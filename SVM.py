@@ -5,7 +5,7 @@ from skimage.io import imread
 import numpy as np 
 import matplotlib.pyplot as plt 
 from sklearn import svm 
-from sklearn.model_selection import GridSearchCV 
+from sklearn.model_selection import GridSearchCV, learning_curve
 from sklearn.model_selection import train_test_split 
 from sklearn.metrics import accuracy_score 
 from sklearn.metrics import classification_report
@@ -55,14 +55,21 @@ svc=svm.SVC(probability=True)
 # Creating a model using GridSearchCV with the parameters grid 
 model=GridSearchCV(svc,param_grid)
 
-# Set steps_per_epoch and validation_steps
-steps_per_epoch = len(x_train) // 8
-validation_steps = len(x_test) // 8
+# Training the model and storing the learning curve
+train_sizes, train_scores, validation_scores = learning_curve(model, x_train, y_train, cv=5, scoring='accuracy')
 
-# Training the model using the training data 
+# Plotting the learning curve
+plt.figure(figsize=(10, 6))
+plt.plot(train_sizes, np.mean(train_scores, axis=1), label='Training Accuracy')
+plt.plot(train_sizes, np.mean(validation_scores, axis=1), label='Validation Accuracy')
+plt.title('Learning Curve')
+plt.xlabel('Training Examples')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
+# Training the model using the training data
 model.fit(x_train, y_train)
-
-
 
 def predict_on_test_dataset(model, Categories, test_dir='test/'):
     true_labels = []
@@ -78,6 +85,7 @@ def predict_on_test_dataset(model, Categories, test_dir='test/'):
             
             # Display the image
             plt.imshow(img)
+            plt.title(f'Category: {category}')
             plt.show()
             
             # Resize the image
@@ -87,9 +95,8 @@ def predict_on_test_dataset(model, Categories, test_dir='test/'):
             img_flat = img_resize.flatten()
             
             # Make a prediction
-            l = [img_flat]
-            prediction = model.predict(l)[0]
-            probability = model.predict_proba(l)
+            prediction = model.predict([img_flat])[0]
+            probability = model.predict_proba([img_flat])
             
             # Display the prediction probabilities
             for ind, val in enumerate(Categories):
@@ -100,7 +107,7 @@ def predict_on_test_dataset(model, Categories, test_dir='test/'):
             predicted_labels.append(prediction)
 
             # Display the predicted image category
-            print("The predicted image is: " + Categories[model.predict(l)[0]])
+            print("The predicted image is: " + Categories[prediction])
 
     from sklearn.metrics import confusion_matrix, accuracy_score    
     # Calculate confusion matrix
@@ -122,6 +129,6 @@ def predict_on_test_dataset(model, Categories, test_dir='test/'):
     print('Classification Report:\n', report)
 
     print(f'Accuracy: {accuracy * 100:.2f}%')
-                
+
 # Call the function with your model and Categories
 predict_on_test_dataset(model, Categories)
