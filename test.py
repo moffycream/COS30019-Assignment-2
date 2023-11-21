@@ -5,12 +5,14 @@ import tensorflow as tf
 import tensorflow_hub as hub
 from tensorflow.python.client import device_lib
 
+
 print("Available devices:", device_lib.list_local_devices())
 
 print("TF version:", tf.version)
 print("Hub version:", hub.version)
 print("GPU is", "available" if tf.config.list_physical_devices('GPU') else "NOT AVAILABLE")
 
+# pre trained model
 model_name = "mobilenet_v3_large_075_224"
 model_handle_map = {
     "mobilenet_v3_large_075_224": "https://tfhub.dev/google/imagenet/mobilenet_v3_large_075_224/feature_vector/5",
@@ -32,7 +34,8 @@ print(f"Input size {IMAGE_SIZE}")
 
 BATCH_SIZE = 16
 
-# Load the training dataset
+# Load the training dataset with resizing and data augmentation
+# Load the training dataset with resizing and data augmentation
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir,
     validation_split=0.2,
@@ -40,10 +43,11 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     seed=123,
     image_size=IMAGE_SIZE,
     batch_size=BATCH_SIZE,
-    label_mode="categorical"
+    label_mode="categorical",
 )
 
-# Load the validation dataset
+# Load the validation dataset with resizing 
+# dataset (train, validation (training curve, other curve), test (confusion matrix, classification report (sklearn) )) split is 80%, 10%, 10%
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir,
     validation_split=0.2,
@@ -51,7 +55,7 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     seed=123,
     image_size=IMAGE_SIZE,
     batch_size=BATCH_SIZE,
-    label_mode="categorical"
+    label_mode="categorical",
 )
 
 # Define the class names

@@ -11,6 +11,7 @@ print("TF version:", tf.__version__)
 print("Hub version:", hub.__version__)
 print("GPU is", "available" if tf.config.list_physical_devices('GPU') else "NOT AVAILABLE")
 
+# pre trained model
 model_name = "mobilenet_v3_large_075_224"
 model_handle_map = {
     "mobilenet_v3_large_075_224": "https://tfhub.dev/google/imagenet/mobilenet_v3_large_075_224/feature_vector/5",
@@ -126,11 +127,16 @@ plt.imshow(image)
 plt.axis('off')
 plt.show()
 
-# Expand the validation image to (1, 224, 224, 3) before predicting the label
-prediction_scores = model.predict(np.expand_dims(image, axis=0))
-predicted_index = np.argmax(prediction_scores)
-print("True label: " + class_names[true_index])
-print("Predicted label: " + class_names[predicted_index])
-
-saved_model_path = f"/tmp/saved_flowers_model_{model_name}"
-tf.saved_model.save(model, saved_model_path)
+# Visualize images during testing
+for x_batch, y_batch in val_ds.take(1):  # Take one batch from the validation dataset
+    for i in range(min(5, BATCH_SIZE)):  # Display up to 5 images
+        image = x_batch[i].numpy().astype("uint8")
+        true_label = class_names[np.argmax(y_batch[i])]
+        predicted_scores = model.predict(np.expand_dims(x_batch[i], axis=0))
+        predicted_label = class_names[np.argmax(predicted_scores)]
+        
+        plt.figure()
+        plt.imshow(image)
+        plt.title(f'True label: {true_label}, Predicted label: {predicted_label}')
+        plt.axis('off')
+        plt.show()
