@@ -6,6 +6,7 @@ import tensorflow_hub as hub
 from tensorflow.python.client import device_lib
 
 
+
 print("Available devices:", device_lib.list_local_devices())
 
 print("TF version:", tf.version)
@@ -122,3 +123,4 @@ for x_batch, y_batch in val_ds.take(1):  # Take one batch from the validation da
         plt.title(f'True label: {true_label}, Predicted label: {predicted_label}')
         plt.axis('off')
         plt.show()
+
