@@ -1,9 +1,6 @@
-import itertools
 import os
-
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import numpy as np
-
 import tensorflow as tf
 import tensorflow_hub as hub
 
@@ -107,22 +104,26 @@ plt.ylim([0,1])
 plt.plot(hist["accuracy"])
 plt.plot(hist["val_accuracy"])
 
-# Visualize the image along with true and predicted labels
-x, y = next(iter(val_ds))
-image = x[0, :, :, :]
-true_index = np.argmax(y[0])
+# Visualize multiple images along with true and predicted labels
+num_images_to_visualize = 4
+for i in range(num_images_to_visualize):
+    x, y = next(iter(val_ds))
+    image = x[0, :, :, :]
+    true_index = np.argmax(y[0])
 
-# Expand the validation image to (1, 224, 224, 3) before predicting the label
-prediction_scores = model.predict(np.expand_dims(image, axis=0))
-predicted_index = np.argmax(prediction_scores)
+    # Expand the validation image to (1, 224, 224, 3) before predicting the label
+    prediction_scores = model.predict(np.expand_dims(image, axis=0))
+    predicted_index = np.argmax(prediction_scores)
 
-plt.figure()
-plt.imshow(image)
-plt.title(f'True label: {class_names[true_index]}, Predicted label: {class_names[predicted_index]}')
-plt.axis('off')
+    plt.figure(figsize=(12, 3))  # Adjust figure size as needed
+    plt.subplot(1, num_images_to_visualize, i + 1)
+    plt.imshow(image)
+    plt.title(f'True: {class_names[true_index]}\nPredicted: {class_names[predicted_index]}')
+    plt.axis('off')
+
 plt.show()
 
-# Print true and predicted labels
+# Print true and predicted labels for the last image
 print("True label:", class_names[true_index])
 print("Predicted label:", class_names[predicted_index])
 
