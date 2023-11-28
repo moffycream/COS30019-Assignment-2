@@ -159,56 +159,55 @@ def train():
     model.summary()
 
     # Set the data directory
-    data_dir = os.path.join(os.path.dirname(__file__), 'train')
+    train_data_dir = os.path.join(os.path.dirname(__file__), 'train')
+    validation_data_dir = os.path.join(os.path.dirname(__file__), 'validation')
+    test_data_dir = os.path.join(os.path.dirname(__file__), 'test')
 
     # Check if the data directory exists
-    if not os.path.exists(data_dir):
+    if not os.path.exists(train_data_dir) or not os.path.exists(validation_data_dir) or not os.path.exists(test_data_dir):
         print("Data directory not found")
         return
     
     # Check if the data directory contains the required subdirectories
-    class_name = sorted(item.name.split('_')[0] for item in pathlib.Path(data_dir).glob("*/") if item.is_dir())
+    class_name_1 = sorted(item.name.split('_')[0] for item in pathlib.Path(train_data_dir).glob("*/") if item.is_dir())
+    class_name_2 = sorted(item.name.split('_')[0] for item in pathlib.Path(validation_data_dir).glob("*/") if item.is_dir())
+    class_name_3 = sorted(item.name.split('_')[0] for item in pathlib.Path(test_data_dir).glob("*/") if item.is_dir())
 
-    if not class_name:
+    # Check if the subdirectories are the same
+    if class_name_1 != class_name_2 or class_name_1 != class_name_3:
         print("Class directories not found")
         return
     
-    #  Create a dataset
+    # Get the class names
+    class_name = class_name_1
+    
+     # Create a dataset from the images in the subdirectories
     # rescale=1/255 normalizes the image pixel values to be between 0 and 1
-    # validation_split=0.2 reserves 20% of the images for validation set
     image_generator = tf.keras.preprocessing.image.ImageDataGenerator(
-        rescale=1/255,
-        validation_split=0.2,
+        rescale=1/255
     )
 
-    def build_dataset(subset):
+    def build_dataset(data_dir):
         return image_generator.flow_from_directory(
             data_dir,
             target_size=IMAGE_SIZE,
             batch_size=BATCH_SIZE,
             class_mode="categorical",
-            subset=subset,
             shuffle=True,
             seed = seed_value,
         )
     
-    train_data = build_dataset("training")
-    validation_data = build_dataset("validation")
+    train_data = build_dataset(train_data_dir)
+    validation_data = build_dataset(validation_data_dir)
+    test_data = build_dataset(test_data_dir)
 
-    # Define a separate testing set
-    test_data_dir = os.path.join(os.path.dirname(__file__), 'test')
-    test_data = image_generator.flow_from_directory(
-        test_data_dir,
-        target_size=IMAGE_SIZE,
-        batch_size=BATCH_SIZE,
-        class_mode='categorical',
-        shuffle=False,
-        seed = seed_value
-    )
-    test_data = test_data
+    # Get the total number of images
+    total_images = len(list(image_generator.flow_from_directory(train_data_dir).filenames))
+    total_images += len(list(image_generator.flow_from_directory(validation_data_dir).filenames))
+    total_images += len(list(image_generator.flow_from_directory(test_data_dir).filenames))
 
     # Print the number of images in each subset
-    print("Total number of images:", len(list(image_generator.flow_from_directory(data_dir).filenames)))
+    print("Total number of images:", total_images)
     print("Number of training images:", train_data.n)
     print("Number of validation images:", validation_data.n)
     print("Number of testing images:", test_data.n)
