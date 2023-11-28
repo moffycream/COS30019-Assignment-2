@@ -47,7 +47,7 @@ def visualize_images(test_data, y_pred, class_names):
                 break
 
             # Display the image
-            plt.figure(figsize=(4, 4))
+            plt.figure(figsize=(8, 6))
             plt.imshow(batch_images[image_index])
 
             # Get the true and predicted labels
