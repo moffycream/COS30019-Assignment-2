@@ -242,7 +242,7 @@ def train():
     # ==================== EVALUATION ====================
 
     # Evaluate the model on the test set
-    loss, accuracy = model.evaluate(test_data)
+    loss, accuracy = model.evaluate(validation_data)
     print("Loss:", loss)
     print("Accuracy:", accuracy)
 
