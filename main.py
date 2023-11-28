@@ -13,7 +13,7 @@ def select_photo():
     print("Selecting photo...")
 
     # Ask the user to select a photo
-    photo_path = filedialog.askopenfilename(initialdir="./testing", title="Select a Photo", filetypes=[("Image Files", "*.jpg;*.jpeg")])
+    photo_path = filedialog.askopenfilename(initialdir="./photos", title="Select a Photo", filetypes=[("Image Files", "*.jpg;*.jpeg")])
 
     # Check if the user has selected a photo
     if photo_path:
@@ -77,9 +77,9 @@ def start_camera_feed():
     if not cap.isOpened():
         raise IOError("Cannot open webcam")
 
-    # Create a testing folder if it doesn't exist
-    if not os.path.exists("testing"):
-        os.makedirs("testing")
+    # Create a photos folder if it doesn't exist
+    if not os.path.exists("photos"):
+        os.makedirs("photos")
     
     # Loop until the user presses ESC
     while True:
@@ -101,7 +101,7 @@ def start_camera_feed():
         if c == ord('q'):
             # Use the current date and time as the filename
             now = datetime.now().strftime("%Y%m%d%H%M%S")
-            filename = "testing/" + now + ".jpg"
+            filename = "photos/" + now + ".jpg"
             cv2.imwrite(filename, frame)
             print("Photo saved: ", filename)
     
