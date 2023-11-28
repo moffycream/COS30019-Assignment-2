@@ -5,6 +5,7 @@ import pathlib # For handling file paths
 import matplotlib.pyplot as plt # For plotting
 import numpy as np
 import sklearn.metrics as tnf # For calculating the confusion matrix and classification report
+import seaborn as sns # For drawing the confusion matrix
 
 def plot_learning_curves(history):
     # Plot training & validation accuracy values
@@ -68,19 +69,11 @@ def report(y_true, y_pred, class_names):
     # Calculate the confusion matrix
     conf_matrix = tf.math.confusion_matrix(y_true, y_pred)
 
-    # Extract values from the confusion matrix
-    TN = conf_matrix[0, 0]
-    FP = conf_matrix[0, 1] if conf_matrix.shape[1] > 1 else 0
-    FN = conf_matrix[1, 0] if conf_matrix.shape[0] > 1 else 0
-    TP = conf_matrix[1, 1] if conf_matrix.shape[0] > 1 and conf_matrix.shape[1] > 1 else 0
-
-    # Draw the confusion matrix
-    print("Confusion Matrix")
-    print(conf_matrix.numpy())
-    print(f"True Negative (TN): {TN}")
-    print(f"False Positive (FP): {FP}")
-    print(f"False Negative (FN): {FN}")
-    print(f"True Positive (TP): {TP}")
+    # Draw the confusion matrix using Seaborn
+    sns.heatmap(conf_matrix, xticklabels=class_names, yticklabels=class_names, annot=True, fmt='g')
+    plt.xlabel("Prediction")
+    plt.ylabel("Actual")
+    plt.show()
 
     # Print the classification report
     print("Classification Report")
