@@ -75,7 +75,6 @@ def report(y_true, y_pred, class_names):
     plt.ylabel("Actual")
     plt.show()
 
-
     # Print the classification report
     print("Classification Report")
     report = tnf.classification_report(y_true, y_pred, target_names=class_names)
@@ -97,17 +96,21 @@ def predict(photo_path):
 
     # Load the image
     img = tf.keras.preprocessing.image.load_img(photo_path, target_size=(224, 224))
+
+    # Convert the image to a numpy array
     img_array = tf.keras.preprocessing.image.img_to_array(img)
-    img_array = tf.expand_dims(img_array, 0)  # Create batch axis
+
+    # Add a fourth dimension to the image (since Keras expects a list of images)
+    img_array = tf.expand_dims(img_array, 0)
 
     # Normalize the image
     img_array = img_array / 255.0
 
     # Get the predictions
-    predictions = model.predict(img_array)
+    y_pred_probs = model.predict(img_array)
     
     # Get the predicted class label
-    predicted_class = np.argmax(predictions, axis=1)[0]
+    y_pred = np.argmax(y_pred_probs, axis=1)[0]
 
     # Get the class names
     class_names = sorted(item.name.split('_')[0] for item in pathlib.Path(os.path.join(os.path.dirname(__file__), 'train')).glob("*/") if item.is_dir())
@@ -115,7 +118,7 @@ def predict(photo_path):
     # Show the image and predicted class name and probability
     plt.figure(figsize=(4, 4))
     plt.imshow(img)
-    plt.title(f"Predicted class: {class_names[predicted_class]} ({predictions[0][predicted_class] * 100:.2f}%)")
+    plt.title(f"Predicted class: {class_names[y_pred]} ({y_pred_probs[0][y_pred] * 100:.2f}%)")
     plt.axis('off')
     plt.show()
 
@@ -234,7 +237,7 @@ def train():
 
     # ==================== EVALUATION ====================
 
-    # Evaluate the model on the test set
+    # Evaluate the model on the validation set
     loss, accuracy = model.evaluate(validation_data)
     print("Loss:", loss)
     print("Accuracy:", accuracy)
@@ -243,9 +246,9 @@ def train():
     plot_learning_curves(history)
 
     # Get the true labels and predicted probabilities
-    y_true = test_data.classes
-    y_pred_probs = model.predict(test_data)
-    y_pred = np.argmax(y_pred_probs, axis=1)
+    y_true = test_data.classes # True labels
+    y_pred_probs = model.predict(test_data) # Predicted probabilities
+    y_pred = np.argmax(y_pred_probs, axis=1) # Predicted labels
 
     # Ask the user to visualize the images
     visualize = input("Visualize images? (y/n): ")
